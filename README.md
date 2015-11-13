@@ -3,8 +3,8 @@ Resize/crop image on the fly according to screen resolution (bootstrap grid patt
 
 ## Prerequisite
 
-Imagick (ImageMagick) PHP extension
-PHP version >= 5.5
+Imagick (ImageMagick) PHP extension <br>
+PHP version >= 5.5 <br>
 Laravel framework 4 and up
 
 ## Installation
@@ -33,7 +33,7 @@ Add service provider in app.php file:
 Izupet\FlyImagesServiceProvider::class
 ```
 
-Put this line of JavaScript to the <head> tag of your template.
+Put this line of JavaScript to the \<head\> tag of your template.
 
 ```javascript
 <script>document.cookie='resolution='+Math.max(screen.width)+'; path=/';</script>
@@ -52,7 +52,10 @@ Route::get('/optimize/{hash}', function($hash, Request $request) {
 });
 ```
 
-Now for every image you want to optimize it you should append query string. Possible parameters are: lg-w lg-h md-w md-h sm-w sm-h xs-w xs-m.
+Now for every image you want to optimize it you should append query string to the path. Possible parameters are: 
+```
+lg-w lg-h md-w md-h sm-w sm-h xs-w xs-m</b>
+```
 
 If screen resolution is equal or higher than 1200px the lg prefixed parameters are used.
 
@@ -65,7 +68,7 @@ A prerequisite for everything to work is that both width and height must be pres
 ####Examples
 
 ```html
-<img alt="No Picture" src="/optimize/test.jpg?lg-w=400&lg-h=400&md-w=300&md-h=300"/>
-<img alt="No Picture" src="/optimize/test.jpg?sm-w=400&lg-h=400&md-w=300&xs-h=300"/> Wont work
+<img src="/optimize/test.jpg?lg-w=400&lg-h=400&md-w=300&md-h=300"/>
+<img src="/optimize/test.jpg?sm-w=400&lg-h=400&md-w=300&xs-h=300"/> Wont work
 <div style="background-image:url('/optimize/test.jpg?sm-w=256&sm-h=256');"></div>
 ```
