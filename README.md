@@ -54,7 +54,7 @@ Route::get('/optimize/{hash}', function($hash, Request $request) {
 
 Now for every image you want to optimize it you should append query string to the path. Possible parameters are: 
 ```
-lg-w lg-h md-w md-h sm-w sm-h xs-w xs-m</b>
+lg-w lg-h md-w md-h sm-w sm-h xs-w xs-m
 ```
 
 If screen resolution is equal or higher than 1200px the lg prefixed parameters are used.
