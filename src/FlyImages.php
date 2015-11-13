@@ -32,7 +32,7 @@ class FlyImages
         if (Cache::has($index)) {
             $this->image->readImageBlob(Cache::get($index));
         } else {
-            $this->image->readImage(sprintf('%s/%s', Config::get('file.folder'), $hash));
+            $this->image->readImage(sprintf('%s/%s', Config::get('flyimages.folder'), $hash));
 
             if (isset($height) && $height == $width) {
                 $this->crop($width, $height);
@@ -40,7 +40,7 @@ class FlyImages
                 $this->resize($width, $height);
             }
 
-            Cache::add($index, $this->image->getImageBlob(), Config::get('file.ttl'));
+            Cache::add($index, $this->image->getImageBlob(), Config::get('flyimages.ttl'));
         }
 
         return response($this->image)->header('Content-type', $this->image->getFormat());

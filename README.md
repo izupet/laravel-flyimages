@@ -22,15 +22,15 @@ Update composer from the terminal:
 $ composer update
 ```
 
-After composer finishes its work, run this artisan command to generate config file
-```bash
-$ php artisan vendor:publish
-```
-
 Add service provider in app.php file:
 
 ```php
 Izupet\FlyImagesServiceProvider::class
+```
+
+After composer finishes its work, run this artisan command to generate config file
+```bash
+$ php artisan vendor:publish
 ```
 
 Put this line of JavaScript to the \<head\> tag of your template.
