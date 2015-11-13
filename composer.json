@@ -1,7 +1,7 @@
 {
-    "name": "izupet/flyimages",
+    "name": "izupet/laravel-flyimages",
     "description": "Optimize images on the fly for laravel",
-    "version": "1.0",
+    "version": "1.0.0",
     "keywords": ["laravel", "images", "fly", "dynamically", "bootstrap"],
     "license": "MIT",
     "authors": [
