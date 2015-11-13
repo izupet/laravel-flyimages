@@ -45,14 +45,14 @@ You are done.
 
 Create new route in route.php file
 ```php
-Route::get('/optimize/{hash}', function($hash, Request $request) {
+Route::get('/optimize/{hash}', function($hash) {
     $flyImage = new \Izupet\FlyImages\FlyImages();
 
-    return $flyImage->optimize($hash, $request);
+    return $flyImage->optimize($hash);
 });
 ```
 
-Now for every image you want to optimize it you should append query string to the path. Possible parameters are: 
+Now for every image you want to optimize it you should append query string to the path. Possible parameters are:
 ```
 lg-w lg-h md-w md-h sm-w sm-h xs-w xs-m
 ```

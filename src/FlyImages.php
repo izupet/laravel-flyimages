@@ -3,7 +3,6 @@
 namespace Izupet\FlyImages;
 
 use Config;
-use Request;
 use Cache;
 
 class FlyImages
@@ -19,12 +18,11 @@ class FlyImages
     * out, otherwise is generated dynamically and put into cache for next usage.
     *
     * @param string $hash
-    * @param object Request $request
     *
     * @access public
     * @return object Imagick with proper Content-type header
     */
-    public function optimize($hash, Request $request)
+    public function optimize($hash)
     {
         $queryString    = $_SERVER['QUERY_STRING'];
         $index          = sprintf('%s?%s', $hash, $queryString);
