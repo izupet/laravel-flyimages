@@ -1,4 +1,4 @@
-# laravel-flyimage
+# laravel-flyimages
 Resize/crop image on the fly according to screen resolution (bootstrap grid pattern).
 
 ## Prerequisite
@@ -12,7 +12,7 @@ First you need to add this line to composer.json file:
 ```json
 {
   "require": {
-       "izupet/laravel-flyimage" : "^1.0.0"
+       "izupet/laravel-flyimages" : "^1.0.0"
     }
 }
 ```
