@@ -12,7 +12,7 @@ First you need to add this line to composer.json file:
 ```json
 {
   "require": {
-       "izupet/laravel-flyimage" : "dev-master"
+       "izupet/laravel-flyimage" : "^1.0.0"
     }
 }
 ```
