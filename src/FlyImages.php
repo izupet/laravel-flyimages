@@ -4,6 +4,7 @@ namespace Izupet\FlyImages;
 
 use Config;
 use Cache;
+use Request;
 
 class FlyImages
 {
@@ -24,26 +25,39 @@ class FlyImages
     */
     public function optimize($hash)
     {
+        $request        = Request::instance();
         $queryString    = $_SERVER['QUERY_STRING'];
         $index          = sprintf('%s?%s', $hash, $queryString);
         $height         = $this->getDimension($queryString, 'h');
         $width          = $this->getDimension($queryString, 'w');
 
-        if (Cache::has($index)) {
+        if (Cache::store('file')->has($index)) {
             $this->image->readImageBlob(Cache::get($index));
         } else {
             $this->image->readImage(sprintf('%s/%s', Config::get('flyimages.folder'), $hash));
-
             if (isset($height) && $height == $width) {
                 $this->crop($width, $height);
             } else if (isset($height, $width) && $height != $width) {
                 $this->resize($width, $height);
             }
-
-            Cache::add($index, $this->image->getImageBlob(), Config::get('flyimages.ttl'));
+            Cache::store('file')->put($index, $this->image->getImageBlob(), Config::get('flyimages.ttl'));
         }
 
-        return response($this->image)->header('Content-type', $this->image->getFormat());
+        $fileTime   = filemtime(sprintf('%s/%s', Config::get('flyimages.folder'), $hash));
+
+        $response   = response($this->image)
+            ->header('Pragma', 'Public')
+            ->header('Content-Type', $this->image->getImageMimeType())
+            ->setEtag(md5($fileTime))
+            ->setLastModified(new \DateTime(date('r', $fileTime)))
+            ->setPublic();
+
+        if($response->isNotModified($request)) {
+
+            return $response;
+        }
+
+        return $response->prepare($request);
     }
 
     /*

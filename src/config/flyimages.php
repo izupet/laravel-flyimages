@@ -12,4 +12,9 @@ return [
      */
     'ttl'                   => '1440',
 
+    /*
+     * Route
+     */
+    'route' => 'optimize'
+    
 ];

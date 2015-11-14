@@ -3,9 +3,9 @@ Resize/crop image on the fly according to screen resolution (bootstrap grid patt
 
 ## Prerequisite
 
-* Imagick (ImageMagick) PHP extension <br>
-* PHP version >= 5.5 <br>
-* Laravel framework 4 and up
+Imagick (ImageMagick) PHP extension <br>
+PHP version >= 5.5 <br>
+Laravel framework 4 and up
 
 ## Installation
 First you need to add this line to composer.json file:
@@ -43,14 +43,7 @@ You are done.
 
 ## Usage
 
-Create new route in route.php file
-```php
-Route::get('/optimize/{hash}', function($hash) {
-    $flyImage = new \Izupet\FlyImages\FlyImages();
-
-    return $flyImage->optimize($hash);
-});
-```
+Customize route in flyimages.php config file. This route will be used as a path to the images in your templates.
 
 Now for every image you want to optimize it you should append query string to the path. Possible parameters are:
 ```
@@ -75,4 +68,9 @@ A prerequisite for everything to work is that both width and height must be pres
 
 ##Caching
 
-All images are cached automatically. You can choose any cache driver you want but best choice is probably filesystem. You can also set image ttl through config file.
+All images are cached automatically. The default cache driver is set to file (you can modify it through cache.php config). You can also set image ttl through config file.
+This package also supports browser caching with ETag and Last-Modified headers.
+
+##TODO
+
+Since laravel does not support tags for file cache driver some alternative it will have to be figured out. For now you can use artisan cache:clear command to flush cache. Be aware that this command will flush ALL cache.

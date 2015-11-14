@@ -14,6 +14,10 @@ class FlyImagesServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/config/flyimages.php' =>  config_path('flyimages.php'),
         ]);
+
+        if (! $this->app->routesAreCached()) {
+            require __DIR__ . '/routes.php';
+        }
     }
     /**
      * Register the service provider.
