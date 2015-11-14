@@ -3,9 +3,9 @@ Resize/crop image on the fly according to screen resolution (bootstrap grid patt
 
 ## Prerequisite
 
-Imagick (ImageMagick) PHP extension <br>
-PHP version >= 5.5 <br>
-Laravel framework 4 and up
+* Imagick (ImageMagick) PHP extension <br>
+* PHP version >= 5.5 <br>
+* Laravel framework 4 and up
 
 ## Installation
 First you need to add this line to composer.json file:
@@ -72,3 +72,7 @@ A prerequisite for everything to work is that both width and height must be pres
 <img src="/optimize/test.jpg?sm-w=400&lg-h=400&md-w=300&xs-h=300"/> Wont work
 <div style="background-image:url('/optimize/test.jpg?sm-w=256&sm-h=256');"></div>
 ```
+
+##Caching
+
+All images are cached automatically. You can choose any cache driver you want but best choice is probably filesystem. You can also set image ttl through config file.
