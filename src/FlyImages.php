@@ -25,6 +25,13 @@ class FlyImages
     */
     public function optimize($hash)
     {
+        $folder = $this->getImagePath($hash);
+
+        if (is_null($folder)) {
+
+            return null;
+        }
+
         $queryString    = $_SERVER['QUERY_STRING'];
         $index          = sprintf('%s?%s', $hash, $queryString);
         $height         = $this->getDimensionValue($queryString, 'h');
@@ -33,7 +40,7 @@ class FlyImages
         if (Cache::store('file')->has($index)) {
             $this->image->readImageBlob(Cache::get($index));
         } else {
-            $this->image->readImage(sprintf('%s/%s', Config::get('flyimages.folder'), $hash));
+            $this->image->readImage(sprintf('%s/%s', $folder, $hash));
 
             if (filter_var($width, FILTER_VALIDATE_INT) && filter_var($height, FILTER_VALIDATE_INT)) {
                 $this->crop($width, $height);
@@ -46,7 +53,7 @@ class FlyImages
             Cache::store('file')->put($index, $this->image->getImageBlob(), Config::get('flyimages.ttl'));
         }
 
-        return $this->respond(filemtime(sprintf('%s/%s', Config::get('flyimages.folder'), $hash)));
+        return $this->respond(filemtime(sprintf('%s/%s', $folder, $hash)));
     }
 
     /*
@@ -172,5 +179,23 @@ class FlyImages
         }
 
         return $response->prepare($request);
+    }
+
+    /*
+    * Find image on the filesystem
+    *
+    * @param string $hash
+    *
+    * @access private
+    * @return string | null
+    */
+    private function getImagePath($hash)
+    {
+        foreach(Config::get('flyimages.folder') as $folder) {
+            if (file_exists(sprintf('%s/%s', $folder, $hash))) {
+
+                return $folder;
+            }
+        }
     }
 }
