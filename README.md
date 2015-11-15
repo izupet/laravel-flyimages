@@ -25,7 +25,7 @@ $ composer update
 Add service provider in app.php file:
 
 ```php
-Izupet\FlyImagesServiceProvider::class
+Izupet\FlyImages\FlyImagesServiceProvider::class
 ```
 
 After composer finishes its work, run this artisan command to generate config file
