@@ -45,10 +45,15 @@ You are done.
 
 Customize route in flyimages.php config file. This route will be used as a path to the images in your templates.
 
-Now for every image you want to optimize it you should append query string to the path. Possible parameters are:
+Now for every image you want to optimize you should append query string to the path. Possible parameters are:
 ```
 lg-w lg-h md-w md-h sm-w sm-h xs-w xs-m
 ```
+
+Valid values for this parameters are:
+
+* number (integer) of pixels
+* text (string) auto - calculate this dimension automatically according to opposite one (the ratio is kept)
 
 If screen resolution is equal or higher than 1200px the lg prefixed parameters are used.
 
@@ -62,6 +67,7 @@ A prerequisite for everything to work is that both width and height must be pres
 
 ```html
 <img src="/optimize/test.jpg?lg-w=400&lg-h=400&md-w=300&md-h=300"/>
+<img src="/optimize/test.jpg?lg-w=auto&lg-h=700"/>
 <img src="/optimize/test.jpg?sm-w=400&lg-h=400&md-w=300&xs-h=300"/> Wont work
 <div style="background-image:url('/optimize/test.jpg?sm-w=256&sm-h=256');"></div>
 ```

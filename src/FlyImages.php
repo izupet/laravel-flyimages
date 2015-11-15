@@ -25,39 +25,28 @@ class FlyImages
     */
     public function optimize($hash)
     {
-        $request        = Request::instance();
         $queryString    = $_SERVER['QUERY_STRING'];
         $index          = sprintf('%s?%s', $hash, $queryString);
-        $height         = $this->getDimension($queryString, 'h');
-        $width          = $this->getDimension($queryString, 'w');
+        $height         = $this->getDimensionValue($queryString, 'h');
+        $width          = $this->getDimensionValue($queryString, 'w');
 
         if (Cache::store('file')->has($index)) {
             $this->image->readImageBlob(Cache::get($index));
         } else {
             $this->image->readImage(sprintf('%s/%s', Config::get('flyimages.folder'), $hash));
-            if (isset($height) && $height == $width) {
+
+            if (filter_var($width, FILTER_VALIDATE_INT) && filter_var($height, FILTER_VALIDATE_INT)) {
                 $this->crop($width, $height);
-            } else if (isset($height, $width) && $height != $width) {
-                $this->resize($width, $height);
+            } else if (filter_var($width, FILTER_VALIDATE_INT) && $height === 'auto') {
+                $this->resize($width, 0);
+            } else if (filter_var($height, FILTER_VALIDATE_INT) && $width === 'auto') {
+                $this->resize(0, $height);
             }
+
             Cache::store('file')->put($index, $this->image->getImageBlob(), Config::get('flyimages.ttl'));
         }
 
-        $fileTime   = filemtime(sprintf('%s/%s', Config::get('flyimages.folder'), $hash));
-
-        $response   = response($this->image)
-            ->header('Pragma', 'Public')
-            ->header('Content-Type', $this->image->getImageMimeType())
-            ->setEtag(md5($fileTime))
-            ->setLastModified(new \DateTime(date('r', $fileTime)))
-            ->setPublic();
-
-        if($response->isNotModified($request)) {
-
-            return $response;
-        }
-
-        return $response->prepare($request);
+        return $this->respond(filemtime(sprintf('%s/%s', Config::get('flyimages.folder'), $hash)));
     }
 
     /*
@@ -71,7 +60,7 @@ class FlyImages
     */
     private function resize($width, $height)
     {
-        $this->image->thumbnailImage($width, $height, true);
+        $this->image->thumbnailImage($width, $height, false);
     }
 
     /*
@@ -123,7 +112,7 @@ class FlyImages
     * @access private
     * @return int | null
     */
-    private function getDimension($queryString, $dimension)
+    private function getDimensionValue($queryString, $dimension)
     {
         parse_str($queryString, $queryParams);
 
@@ -156,5 +145,32 @@ class FlyImages
                 return $queryParams[sprintf('lg-%s', $dimension)];
             }
         }
+    }
+
+    /*
+    * Return proper respond according to file was modified or not.
+    *
+    * @param int $fileTime
+    *
+    * @access private
+    * @return object Response
+    */
+    private function respond($fileTime)
+    {
+        $request = Request::instance();
+
+        $response = response($this->image)
+            ->header('Pragma', 'Public')
+            ->header('Content-Type', $this->image->getImageMimeType())
+            ->setEtag(md5($fileTime))
+            ->setLastModified(new \DateTime(date('r', $fileTime)))
+            ->setPublic();
+
+        if($response->isNotModified($request)) {
+
+            return $response;
+        }
+
+        return $response->prepare($request);
     }
 }
