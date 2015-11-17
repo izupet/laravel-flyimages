@@ -32,15 +32,21 @@ class FlyImages
             return null;
         }
 
+        $request        = Request::instance();
         $queryString    = $_SERVER['QUERY_STRING'];
         $index          = sprintf('%s?%s', $hash, $queryString);
-        $height         = $this->getDimensionValue($queryString, 'h');
-        $width          = $this->getDimensionValue($queryString, 'w');
+        $fileTime       = filemtime(sprintf('%s/%s', $folder, $hash));
+        $image          = file_get_contents(sprintf('%s/%s', $folder, $hash));
 
         if (Cache::store('file')->has($index)) {
-            $this->image->readImageBlob(Cache::get($index));
+            $mimeType   = Cache::store('file')->get($index)['mime'];
+            $response   = response($image);
         } else {
+            $height = $this->getDimensionValue($queryString, 'h');
+            $width  = $this->getDimensionValue($queryString, 'w');
+
             $this->image->readImage(sprintf('%s/%s', $folder, $hash));
+            $mimeType = $this->image->getImageMimeType();
 
             if (filter_var($width, FILTER_VALIDATE_INT) && filter_var($height, FILTER_VALIDATE_INT)) {
                 $this->crop($width, $height);
@@ -50,10 +56,25 @@ class FlyImages
                 $this->resize(0, $height);
             }
 
-            Cache::store('file')->put($index, $this->image->getImageBlob(), Config::get('flyimages.ttl'));
+            Cache::store('file')->put($index, [
+                'blob' => $image,
+                'mime' => $mimeType
+            ], Config::get('flyimages.ttl'));
         }
 
-        return $this->respond(filemtime(sprintf('%s/%s', $folder, $hash)));
+        $response = response($image)
+            ->header('Pragma', 'Public')
+            ->header('Content-Type', $mimeType)
+            ->setEtag(md5($fileTime))
+            ->setLastModified(new \DateTime(date('r', $fileTime)))
+            ->setPublic();
+
+        if($response->isNotModified($request)) {
+
+            return $response;
+        }
+
+        return $response->prepare($request);
     }
 
     /*
@@ -152,33 +173,6 @@ class FlyImages
                 return $queryParams[sprintf('lg-%s', $dimension)];
             }
         }
-    }
-
-    /*
-    * Return proper respond according to file was modified or not.
-    *
-    * @param int $fileTime
-    *
-    * @access private
-    * @return object Response
-    */
-    private function respond($fileTime)
-    {
-        $request = Request::instance();
-
-        $response = response($this->image)
-            ->header('Pragma', 'Public')
-            ->header('Content-Type', $this->image->getImageMimeType())
-            ->setEtag(md5($fileTime))
-            ->setLastModified(new \DateTime(date('r', $fileTime)))
-            ->setPublic();
-
-        if($response->isNotModified($request)) {
-
-            return $response;
-        }
-
-        return $response->prepare($request);
     }
 
     /*
