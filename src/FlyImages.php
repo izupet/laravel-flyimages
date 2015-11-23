@@ -3,14 +3,13 @@
 namespace Izupet\FlyImages;
 
 use Config;
-use Cache;
-use Request;
+use Exception;
 
 class FlyImages
 {
     public function __construct()
     {
-        $this->size     = $this->getSize($_COOKIE['resolution']);
+        $this->size     = $this->getSize(isset($_COOKIE['resolution']) ? $_COOKIE['resolution'] : 1200);
         $this->image    = new \Imagick();
     }
 
@@ -27,54 +26,35 @@ class FlyImages
     {
         $folder = $this->getImagePath($hash);
 
+        //Check if image exists. If not, throw exception.
         if (is_null($folder)) {
-
-            return null;
+            throw new Exception('Image does not exists.');
         }
 
-        $request        = Request::instance();
-        $queryString    = $_SERVER['QUERY_STRING'];
-        $index          = sprintf('%s?%s', $hash, $queryString);
-        $fileTime       = filemtime(sprintf('%s/%s', $folder, $hash));
-        $image          = file_get_contents(sprintf('%s/%s', $folder, $hash));
+        //Check if any etag is set.
+        if(!empty(request()->instance()->getETags())) {
 
-        if (Cache::store('file')->has($index)) {
-            $mimeType   = Cache::store('file')->get($index)['mime'];
-            $response   = response($image);
-        } else {
-            $height = $this->getDimensionValue($queryString, 'h');
-            $width  = $this->getDimensionValue($queryString, 'w');
-
-            $this->image->readImage(sprintf('%s/%s', $folder, $hash));
-            $mimeType = $this->image->getImageMimeType();
-
-            if (filter_var($width, FILTER_VALIDATE_INT) && filter_var($height, FILTER_VALIDATE_INT)) {
-                $this->crop($width, $height);
-            } else if (filter_var($width, FILTER_VALIDATE_INT) && $height === 'auto') {
-                $this->resize($width, 0);
-            } else if (filter_var($height, FILTER_VALIDATE_INT) && $width === 'auto') {
-                $this->resize(0, $height);
-            }
-
-            Cache::store('file')->put($index, [
-                'blob' => $image,
-                'mime' => $mimeType
-            ], Config::get('flyimages.ttl'));
+            return response(null)->setNotModified();
         }
 
-        $response = response($image)
+        $newHeight = $this->getDimensionValue('h');
+        $newWidth  = $this->getDimensionValue('w');
+
+        $this->image->readImage(sprintf('%s/%s', $folder, $hash));
+
+        if (filter_var($newWidth, FILTER_VALIDATE_INT) && filter_var($newHeight, FILTER_VALIDATE_INT)) {
+            $this->crop($newWidth, $newHeight);
+        } else if (filter_var($newWidth, FILTER_VALIDATE_INT) && $newHeight === 'auto') {
+            $this->resize($newWidth, 0);
+        } else if (filter_var($newHeight, FILTER_VALIDATE_INT) && $newWidth === 'auto') {
+            $this->resize(0, $newHeight);
+        }
+
+        return response($this->image)
             ->header('Pragma', 'Public')
-            ->header('Content-Type', $mimeType)
-            ->setEtag(md5($fileTime))
-            ->setLastModified(new \DateTime(date('r', $fileTime)))
+            ->header('Content-Type', $this->image->getImageMimeType())
+            ->setEtag(md5(sprintf('%s-%s', $hash, $_SERVER['QUERY_STRING'])))
             ->setPublic();
-
-        if($response->isNotModified($request)) {
-
-            return $response;
-        }
-
-        return $response->prepare($request);
     }
 
     /*
@@ -140,9 +120,9 @@ class FlyImages
     * @access private
     * @return int | null
     */
-    private function getDimensionValue($queryString, $dimension)
+    private function getDimensionValue($dimension)
     {
-        parse_str($queryString, $queryParams);
+        parse_str($_SERVER['QUERY_STRING'], $queryParams);
 
         if ($this->size === 'lg') {
             if (array_key_exists(sprintf('lg-%s', $dimension), $queryParams)) {

@@ -6,7 +6,7 @@ return [
      * Path to the folders where images are stored. Multiple paths can be specified.
      * The script will loop over this list of folder paths and first match will be taken.
      */
-    'folder' => [
+    'path' => [
         '../public/media',
         '../public'
     ],

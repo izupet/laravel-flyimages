@@ -74,9 +74,4 @@ A prerequisite for everything to work is that both width and height must be pres
 
 ##Caching
 
-All images are cached automatically. The default cache driver is set to file (you can modify it through cache.php config). You can also set image ttl through config file.
-This package also supports browser caching with ETag and Last-Modified headers.
-
-##TODO
-
-Since laravel does not support tags for file cache driver some alternative it will have to be figured out. For now you can use artisan cache:clear command to flush cache. Be aware that this command will flush ALL cache.
+Browser caching is available through ETAg header. Server side caching is not used. It is recommended to use reverse proxy cache server or CDN for very visited websites.
